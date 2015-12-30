@@ -1018,21 +1018,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           m_zoomInB.setEnabled(false);
         }
 
-        m_groupB.setEnabled(false);
-        if (getSelectedBeans().size() > 0 && !getExecuting()) {
-          // Able to group selected subflow?
-          final Vector<Object> selected = m_mainKFPerspective
-            .getSelectedBeans();
-          // check if sub flow is valid
-          final Vector<Object> inputs = BeanConnection.inputs(selected,
-            m_mainKFPerspective.getCurrentTabIndex());
-          final Vector<Object> outputs = BeanConnection.outputs(selected,
-            m_mainKFPerspective.getCurrentTabIndex());
-
-          if (groupable(selected, inputs, outputs)) {
-            m_groupB.setEnabled(true);
-          }
-        }
+        getBeansSelected();
 
         m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
@@ -1066,7 +1052,24 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         m_playBB.setEnabled(!getExecuting());
         m_stopB.setEnabled(getExecuting());
 
-        m_groupB.setEnabled(false);
+        getBeansSelected();
+
+        m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_selectAllB.setEnabled(BeanInstance.getBeanInstances(
+          getCurrentTabIndex()).size() > 0
+          && !getExecuting());
+        m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
+        m_pasteB
+          .setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0)
+            && !getExecuting());
+        m_undoB.setEnabled(!getExecuting() && getUndoBuffer().size() > 0);
+      }
+    }
+
+	
+	private void getBeansSelected() {
+		m_groupB.setEnabled(false);
         if (getSelectedBeans().size() > 0 && !getExecuting()) {
           // Able to group selected subflow?
           final Vector<Object> selected = m_mainKFPerspective
@@ -1081,19 +1084,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
             m_groupB.setEnabled(true);
           }
         }
-
-        m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
-        m_deleteB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
-        m_selectAllB.setEnabled(BeanInstance.getBeanInstances(
-          getCurrentTabIndex()).size() > 0
-          && !getExecuting());
-        m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
-        m_pasteB
-          .setEnabled((m_pasteBuffer != null && m_pasteBuffer.length() > 0)
-            && !getExecuting());
-        m_undoB.setEnabled(!getExecuting() && getUndoBuffer().size() > 0);
-      }
-    }
+	}
 
     public synchronized boolean getExecuting() {
       return getExecuting(getCurrentTabIndex());
@@ -1259,21 +1250,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       if (getNumTabs() > 0) {
         setSelectedBeans(getCurrentTabIndex(), beans);
 
-        m_groupB.setEnabled(false);
-        if (getSelectedBeans().size() > 0 && !getExecuting()) {
-          // Able to group selected subflow?
-          final Vector<Object> selected = m_mainKFPerspective
-            .getSelectedBeans();
-          // check if sub flow is valid
-          final Vector<Object> inputs = BeanConnection.inputs(selected,
-            m_mainKFPerspective.getCurrentTabIndex());
-          final Vector<Object> outputs = BeanConnection.outputs(selected,
-            m_mainKFPerspective.getCurrentTabIndex());
-
-          if (groupable(selected, inputs, outputs)) {
-            m_groupB.setEnabled(true);
-          }
-        }
+        getBeansSelected();
 
         m_cutB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
         m_copyB.setEnabled(getSelectedBeans().size() > 0 && !getExecuting());
