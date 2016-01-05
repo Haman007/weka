@@ -5038,23 +5038,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           int result = JOptionPane.showConfirmDialog(KnowledgeFlowApp.this,
             tempS2, "Confirm action", JOptionPane.YES_NO_OPTION);
           if (result == JOptionPane.YES_OPTION) {
-            Thread startPointThread = new Thread() {
-              @Override
-              public void run() {
-                try {
-                  if (startable) {
-                    ((Startable) bc).start();
-                  } else if (bc instanceof UserRequestAcceptor) {
-                    ((UserRequestAcceptor) bc).performRequest(tempS2);
-                  }
-                  notifyIsDirty();
-                } catch (Exception ex) {
-                  ex.printStackTrace();
-                }
-              }
-            };
-            startPointThread.setPriority(Thread.MIN_PRIORITY);
-            startPointThread.start();
+        	runStartPointThread(bc, startable, tempS2);
           }
         }
       });
@@ -5062,23 +5046,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       custItem.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          Thread startPointThread = new Thread() {
-            @Override
-            public void run() {
-              try {
-                if (startable) {
-                  ((Startable) bc).start();
-                } else if (bc instanceof UserRequestAcceptor) {
-                  ((UserRequestAcceptor) bc).performRequest(tempS2);
-                }
-                notifyIsDirty();
-              } catch (Exception ex) {
-                ex.printStackTrace();
-              }
-            }
-          };
-          startPointThread.setPriority(Thread.MIN_PRIORITY);
-          startPointThread.start();
+          runStartPointThread(bc, startable, tempS2);
         }
       });
     }
@@ -6980,7 +6948,28 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     this.firePropertyChange("PROP_DIRTY", null, null);
   }
 
-  /**
+  //this method initially was used to start the point thread, it takes 3 parameters 
+  private void runStartPointThread(final JComponent bc, final boolean startable, final String tempS2) {
+	Thread startPointThread = new Thread() {
+	    @Override
+	    public void run() {
+	      try {
+	        if (startable) {
+	          ((Startable) bc).start();
+	        } else if (bc instanceof UserRequestAcceptor) {
+	          ((UserRequestAcceptor) bc).performRequest(tempS2);
+	        }
+	        notifyIsDirty();
+	      } catch (Exception ex) {
+	        ex.printStackTrace();
+	      }
+	    }
+	  };
+	  startPointThread.setPriority(Thread.MIN_PRIORITY);
+	  startPointThread.start();
+}
+
+/**
    * Main method.
    * 
    * @param args a <code>String[]</code> value
