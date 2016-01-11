@@ -350,18 +350,19 @@ public class KDTree
       }
       findNearestNeighbours(target, nearer, k, heap, distanceToParents);
 
+      // my adjustment
+      double distanceToSplitPlane = distanceToParents
+              + m_EuclideanDistance.sqDifference(node.m_SplitDim, target
+                  .value(node.m_SplitDim), node.m_SplitValue);
+      
       // ... now look in further half if maxDist reaches into it
       if (heap.size() < k) { // if haven't found the first k
-        double distanceToSplitPlane = distanceToParents
-            + m_EuclideanDistance.sqDifference(node.m_SplitDim, target
-                .value(node.m_SplitDim), node.m_SplitValue);
+       
         findNearestNeighbours(target, further, k, heap, distanceToSplitPlane);
         return;
-      } else { // else see if ball centered at query intersects with the other
-                // side.
-        double distanceToSplitPlane = distanceToParents
-            + m_EuclideanDistance.sqDifference(node.m_SplitDim, target
-                .value(node.m_SplitDim), node.m_SplitValue);
+      } 
+      else { // else see if ball centered at query intersects with the other
+       
         if (heap.peek().distance >= distanceToSplitPlane) {
           findNearestNeighbours(target, further, k, heap, distanceToSplitPlane);
         }
@@ -653,30 +654,48 @@ public class KDTree
    * dimension/attribute.
    */
   protected int widestDim(double[][] nodeRanges, double[][] universe) {
-    final int classIdx = m_Instances.classIndex();
-    double widest = 0.0;
-    int w = -1;
-    if (m_NormalizeNodeWidth) {
-      for (int i = 0; i < nodeRanges.length; i++) {
-        double newWidest = nodeRanges[i][WIDTH] / universe[i][WIDTH];
-        if (newWidest > widest) {
-          if (i == classIdx)
-            continue;
-          widest = newWidest;
-          w = i;
-        }
-      }
-    } else {
-      for (int i = 0; i < nodeRanges.length; i++) {
-        if (nodeRanges[i][WIDTH] > widest) {
-          if (i == classIdx)
-            continue;
-          widest = nodeRanges[i][WIDTH];
-          w = i;
-        }
-      }
-    }
-    return w;
+	    final int classIdx = m_Instances.classIndex();
+	    double widest = 0.0;   
+	    boolean t= true;
+	    int w = -1;
+	    if (m_NormalizeNodeWidth) {
+	     
+	    	w = RangeIndex(nodeRanges,universe,classIdx, t);
+	    } else {
+	    	
+	    	t = false;
+	    	w = RangeIndex(nodeRanges,universe,classIdx, t);
+	    }
+	    return w;
+	  }
+
+
+  public int RangeIndex(double[][] nodeRanges, double[][] universe,int classIdx,boolean flag)
+  {
+	  double widest = 0.0;
+	  double newWidest =0.0;
+	  int w = 0;
+	  for (int i = 0; i < nodeRanges.length; i++) {
+		  
+		  if (flag == true)
+		  {
+	         newWidest = nodeRanges[i][WIDTH] / universe[i][WIDTH];
+		  }
+		  else
+		  {
+			   newWidest = nodeRanges[i][WIDTH];
+		  }
+		  
+	        if (newWidest > widest) {
+	          if (i == classIdx)
+	            continue;
+	          widest = newWidest;
+	          w = i;
+	        }
+	      }
+	  
+	  
+	  return w;
   }
 
   /**
@@ -1254,41 +1273,42 @@ public class KDTree
    * @param options	the list of options as an array of strings
    * @throws Exception	if an option is not supported
    */
+ 
   public void setOptions(String[] options) throws Exception {
-    super.setOptions(options);
+	    super.setOptions(options);
 
-    String optionString = Utils.getOption('S', options);
-    if (optionString.length() != 0) {
-      String splitMethodSpec[] = Utils.splitOptions(optionString);
-      if (splitMethodSpec.length == 0) {
-        throw new Exception("Invalid DistanceFunction specification string.");
-      }
-      String className = splitMethodSpec[0];
-      splitMethodSpec[0] = "";
+	    String optionString = Utils.getOption('S', options);
+	    if (optionString.length() != 0) {
+	      String splitMethodSpec[] = Utils.splitOptions(optionString);
+	      if (splitMethodSpec.length == 0) {
+	        throw new Exception("Invalid DistanceFunction specification string.");
+	      }
+	      String className = splitMethodSpec[0];
+	      splitMethodSpec[0] = "";
 
-      setNodeSplitter((KDTreeNodeSplitter) Utils.forName(
-          KDTreeNodeSplitter.class, className, splitMethodSpec));
-    }
-    else {
-      setNodeSplitter(new SlidingMidPointOfWidestSide());
-    }
+	      setNodeSplitter((KDTreeNodeSplitter) Utils.forName(
+	          KDTreeNodeSplitter.class, className, splitMethodSpec));
+	    }
+	    else {
+	      setNodeSplitter(new SlidingMidPointOfWidestSide());
+	    }
 
-    optionString = Utils.getOption('W', options);
-    if (optionString.length() != 0)
-      setMinBoxRelWidth(Double.parseDouble(optionString));
-    else
-      setMinBoxRelWidth(1.0E-2);
+	    optionString = Utils.getOption('W', options);
+	    if (optionString.length() != 0)
+	      setMinBoxRelWidth(Double.parseDouble(optionString));
+	    else
+	      setMinBoxRelWidth(1.0E-2);
 
-    optionString = Utils.getOption('L', options);
-    if (optionString.length() != 0)
-      setMaxInstInLeaf(Integer.parseInt(optionString));
-    else
-      setMaxInstInLeaf(40);
+	    optionString = Utils.getOption('L', options);
+	    if (optionString.length() != 0)
+	      setMaxInstInLeaf(Integer.parseInt(optionString));
+	    else
+	      setMaxInstInLeaf(40);
 
-    setNormalizeNodeWidth(Utils.getFlag('N', options));
-    
-    Utils.checkForRemainingOptions(options);
-  }
+	    setNormalizeNodeWidth(Utils.getFlag('N', options));
+	    
+	    Utils.checkForRemainingOptions(options);
+	  }
 
   /**
    * Gets the current settings of KDtree.
